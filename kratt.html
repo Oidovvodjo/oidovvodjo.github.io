@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+  <meta charset="UTF-8">
+  <title>Küpsise-Kratt – allalaadimine</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- JSZip -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+      width: 100%;
+      padding: 40px;
+      text-align: center;
+    }
+
+    .icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    h1 {
+      font-size: 32px;
+      color: #2d3748;
+      margin-bottom: 12px;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      color: #718096;
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+
+    .features {
+      background: #f7fafc;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 32px;
+      text-align: left;
+    }
+
+    .feature {
+      display: flex;
+      align-items: center;
+      margin-bottom: 16px;
+      font-size: 14px;
+      color: #4a5568;
+    }
+
+    .feature:last-child {
+      margin-bottom: 0;
+    }
+
+    .feature-icon {
+      margin-right: 12px;
+      font-size: 20px;
+    }
+
+    button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 16px 32px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .status {
+      margin-top: 20px;
+      font-size: 14px;
+      min-height: 20px;
+    }
+
+    .status.loading {
+      color: #667eea;
+      font-weight: 500;
+    }
+
+    .status.success {
+      color: #48bb78;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .error {
+      background: #fff5f5;
+      color: #c53030;
+      padding: 16px;
+      border-radius: 8px;
+      border-left: 4px solid #fc8181;
+      margin-top: 20px;
+      font-size: 14px;
+      display: none;
+      text-align: left;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #667eea;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .version {
+      margin-top: 24px;
+      font-size: 12px;
+      color: #a0aec0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="icon">🍪</div>
+  <h1>Küpsise-Kratt</h1>
+  <p class="subtitle">Brauserilaiendus, mis blokeerib jälgimisküpsised enne nende tekkimist</p>
+  
+  <div class="features">
+    <div class="feature">
+      <span class="feature-icon">🛡️</span>
+      <span>Blokeerib kolmandate osapoolte küpsised automaatselt</span>
+    </div>
+    <div class="feature">
+      <span class="feature-icon">🧹</span>
+      <span>Kustuta kõik küpsised ühe klikiga</span>
+    </div>
+    <div class="feature">
+      <span class="feature-icon">📊</span>
+      <span>Vaata blokeeritud päringute ajalugu</span>
+    </div>
+    <div class="feature">
+      <span class="feature-icon">⚡</span>
+      <span>Kerge ja kiire – ei aeglusta lehti</span>
+    </div>
+  </div>
+
+  <button id="download">
+    <span id="buttonText">⬇️ Laadi alla laiendus</span>
+  </button>
+  
+  <div id="status" class="status"></div>
+  <div id="error" class="error"></div>
+
+  <div class="version">Versioon 2.0</div>
+</div>
+
+<script>
+document.getElementById("download").onclick = async () => {
+  const statusEl = document.getElementById("status");
+  const errorEl = document.getElementById("error");
+  const button = document.getElementById("download");
+  const buttonText = document.getElementById("buttonText");
+  
+  // Clear previous messages
+  statusEl.textContent = "";
+  statusEl.className = "status";
+  errorEl.style.display = "none";
+  button.disabled = true;
+  
+  try {
+    // Check if JSZip is loaded
+    if (typeof JSZip === 'undefined') {
+      throw new Error('JSZip teek ei laadinud. Palun kontrolli internetiühendust ja värskenda lehte.');
+    }
+
+    buttonText.innerHTML = '<span class="spinner"></span> Genereerin...';
+    statusEl.textContent = "Koostan laienduse faile...";
+    statusEl.className = "status loading";
+
+    const zip = new JSZip();
+
+    /* ================= manifest.json ================= */
+    zip.file("manifest.json", JSON.stringify({
+      "manifest_version": 3,
+      "name": "Küpsise-Kratt",
+      "version": "2.0",
+      "description": "Blokeerib jälgimisküpsised enne nende tekkimist",
+      "permissions": [
+        "cookies",
+        "tabs",
+        "storage",
+        "declarativeNetRequest",
+        "declarativeNetRequestFeedback"
+      ],
+      "host_permissions": ["<all_urls>"],
+      "background": {
+        "service_worker": "background.js"
+      },
+      "declarative_net_request": {
+        "rule_resources": [
+          {
+            "id": "block-cookies",
+            "enabled": true,
+            "path": "rules.json"
+          }
+        ]
+      },
+      "action": {
+        "default_popup": "popup.html"
+      }
+    }, null, 2));
+
+    /* ================= popup.html ================= */
+    zip.file("popup.html", `<!DOCTYPE html>
+<html lang="et">
+<head>
+  <meta charset="UTF-8">
+  <title>Küpsise-Kratt</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>🍪 Küpsise-Kratt</h1>
+  <div id="info"></div>
+  <button id="deleteAll">🧹 Kustuta kõik</button>
+  <ul id="cookieList"></ul>
+
+  <h2>⛔ Blokeeritud</h2>
+  <ul id="blockedList"></ul>
+
+  <script src="popup.js"><\/script>
+</body>
+</html>`);
+
+    /* ================= popup.js ================= */
+    zip.file("popup.js", `const list = document.getElementById("cookieList");
+const info = document.getElementById("info");
+const deleteAllBtn = document.getElementById("deleteAll");
+const blockedList = document.getElementById("blockedList");
+
+let currentCookies = [];
+
+chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+  if (!tabs || !tabs[0]) {
+    info.textContent = "Viga: ei suutnud leida aktiivset vahelehte";
+    return;
+  }
+
+  try {
+    const url = new URL(tabs[0].url);
+    info.textContent = "Domeen: " + url.hostname;
+
+    chrome.cookies.getAll({ domain: url.hostname }, cookies => {
+      currentCookies = cookies || [];
+      renderCookies(currentCookies);
+    });
+  } catch (err) {
+    info.textContent = "Viga: " + err.message;
+  }
+});
+
+function renderCookies(cookies) {
+  list.innerHTML = "";
+  if (!cookies || !cookies.length) {
+    list.innerHTML = "<li>Ei leitud küpsiseid</li>";
+    return;
+  }
+
+  cookies.forEach(c => {
+    const li = document.createElement("li");
+    li.textContent = c.name;
+    li.onclick = () => deleteCookie(c);
+    list.appendChild(li);
+  });
+}
+
+function deleteCookie(cookie) {
+  try {
+    const url = (cookie.secure ? "https://" : "http://") +
+                cookie.domain.replace(/^\\\\./, "") +
+                cookie.path;
+
+    chrome.cookies.remove({ url, name: cookie.name }, () => {
+      if (chrome.runtime.lastError) {
+        console.error("Cookie deletion error:", chrome.runtime.lastError);
+        return;
+      }
+      currentCookies = currentCookies.filter(c => c.name !== cookie.name);
+      renderCookies(currentCookies);
+    });
+  } catch (err) {
+    console.error("Error deleting cookie:", err);
+  }
+}
+
+deleteAllBtn.onclick = () => {
+  currentCookies.forEach(deleteCookie);
+};
+
+chrome.storage.local.get("blocked", data => {
+  if (chrome.runtime.lastError) {
+    console.error("Storage error:", chrome.runtime.lastError);
+    return;
+  }
+  
+  (data.blocked || []).forEach(b => {
+    try {
+      const li = document.createElement("li");
+      li.textContent = "[" + b.time + "] " + new URL(b.url).hostname;
+      blockedList.appendChild(li);
+    } catch (err) {
+      console.error("Error rendering blocked item:", err);
+    }
+  });
+});`);
+
+    /* ================= style.css ================= */
+    zip.file("style.css", `body {
+  font-family: sans-serif;
+  width: 320px;
+  padding: 10px;
+}
+h1 { font-size: 16px; }
+h2 { font-size: 13px; margin-top: 10px; }
+ul { padding-left: 14px; }
+li { font-size: 12px; cursor: pointer; }
+button { width: 100%; margin-bottom: 8px; }`);
+
+    /* ================= background.js ================= */
+    zip.file("background.js", `chrome.runtime.onInstalled.addListener(() => {
+  chrome.storage.local.set({ blocked: [] }, () => {
+    if (chrome.runtime.lastError) {
+      console.error("Storage initialization error:", chrome.runtime.lastError);
+    }
+  });
+});
+
+chrome.declarativeNetRequest.onRuleMatchedDebug.addListener(event => {
+  try {
+    const entry = {
+      time: new Date().toLocaleTimeString(),
+      url: event.request.url,
+      ruleId: event.rule.ruleId
+    };
+
+    chrome.storage.local.get("blocked", data => {
+      if (chrome.runtime.lastError) {
+        console.error("Storage get error:", chrome.runtime.lastError);
+        return;
+      }
+
+      const updated = [entry, ...(data.blocked || [])].slice(0, 50);
+      chrome.storage.local.set({ blocked: updated }, () => {
+        if (chrome.runtime.lastError) {
+          console.error("Storage set error:", chrome.runtime.lastError);
+        }
+      });
+    });
+  } catch (err) {
+    console.error("Error logging blocked request:", err);
+  }
+});`);
+
+    /* ================= rules.json ================= */
+    zip.file("rules.json", JSON.stringify([
+      {
+        "id": 1,
+        "priority": 1,
+        "action": {
+          "type": "modifyHeaders",
+          "responseHeaders": [
+            {
+              "header": "set-cookie",
+              "operation": "remove"
+            }
+          ]
+        },
+        "condition": {
+          "resourceTypes": ["main_frame", "sub_frame", "xmlhttprequest", "script", "image"],
+          "domainType": "thirdParty"
+        }
+      }
+    ], null, 2));
+
+    /* ================= DOWNLOAD ================= */
+    statusEl.textContent = "Pakkin ZIP-faili...";
+    
+    const blob = await zip.generateAsync({ type: "blob" });
+    
+    statusEl.textContent = "Allustan allalaadimist...";
+    
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "kupsise-kratt.zip";
+    a.click();
+    
+    // Clean up
+    setTimeout(() => URL.revokeObjectURL(a.href), 100);
+    
+    buttonText.innerHTML = "✓ Allalaetud";
+    statusEl.innerHTML = '<span>✓</span> Allalaadimine õnnestus!';
+    statusEl.className = "status success";
+    
+    // Reset button after 3 seconds
+    setTimeout(() => {
+      button.disabled = false;
+      buttonText.innerHTML = "⬇️ Laadi alla laiendus";
+    }, 3000);
+    
+  } catch (err) {
+    console.error("Download error:", err);
+    errorEl.textContent = "❌ Viga: " + err.message;
+    errorEl.style.display = "block";
+    statusEl.textContent = "";
+    button.disabled = false;
+    buttonText.innerHTML = "⬇️ Laadi alla laiendus";
+  }
+};
+</script>
+
+</body>
+</html>
