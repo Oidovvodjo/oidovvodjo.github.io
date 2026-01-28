@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+  <meta charset="UTF-8">
+  <title>Küpsise-Kratt – allalaadimine</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- JSZip -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <style>
+    body { font-family: sans-serif; padding: 30px; }
+    button {
+      font-size: 16px;
+      padding: 12px 20px;
+      cursor: pointer;
+    }
+    .error {
+      color: red;
+      margin-top: 10px;
+      padding: 10px;
+      border: 1px solid red;
+      border-radius: 4px;
+      display: none;
+    }
+    .success {
+      color: green;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🍪 Küpsise-Kratt</h1>
+<p>
+  Kliki nuppu, et alla laadida <strong>täielik töötav brauserilaiendus</strong>.
+</p>
+
+<button id="download">⬇ Laadi alla Küpsise-Kratt</button>
+<div id="status"></div>
+<div id="error" class="error"></div>
+
+<script>
+document.getElementById("download").onclick = async () => {
+  const statusEl = document.getElementById("status");
+  const errorEl = document.getElementById("error");
+  
+  // Clear previous messages
+  statusEl.textContent = "";
+  errorEl.style.display = "none";
+  
+  try {
+    // Check if JSZip is loaded
+    if (typeof JSZip === 'undefined') {
+      throw new Error('JSZip library failed to load. Please check your internet connection and refresh.');
+    }
+
+    const zip = new JSZip();
+
+    /* ================= manifest.json ================= */
+    zip.file("manifest.json", JSON.stringify({
+      "manifest_version": 3,
+      "name": "Küpsise-Kratt",
+      "version": "2.0",
+      "description": "Blokeerib jälgimisküpsised enne nende tekkimist",
+      "permissions": [
+        "cookies",
+        "tabs",
+        "storage",
+        "declarativeNetRequest",
+        "declarativeNetRequestFeedback"
+      ],
+      "host_permissions": ["<all_urls>"],
+      "background": {
+        "service_worker": "background.js"
+      },
+      "declarative_net_request": {
+        "rule_resources": [
+          {
+            "id": "block-cookies",
+            "enabled": true,
+            "path": "rules.json"
+          }
+        ]
+      },
+      "action": {
+        "default_popup": "popup.html"
+      }
+    }, null, 2));
+
+    /* ================= popup.html ================= */
+    zip.file("popup.html", `<!DOCTYPE html>
+<html lang="et">
+<head>
+  <meta charset="UTF-8">
+  <title>Küpsise-Kratt</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>🍪 Küpsise-Kratt</h1>
+  <div id="info"></div>
+  <button id="deleteAll">🧹 Kustuta kõik</button>
+  <ul id="cookieList"></ul>
+
+  <h2>⛔ Blokeeritud</h2>
+  <ul id="blockedList"></ul>
+
+  <script src="popup.js"><\/script>
+</body>
+</html>`);
+
+    /* ================= popup.js ================= */
+    zip.file("popup.js", `const list = document.getElementById("cookieList");
+const info = document.getElementById("info");
+const deleteAllBtn = document.getElementById("deleteAll");
+const blockedList = document.getElementById("blockedList");
+
+let currentCookies = [];
+
+chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+  if (!tabs || !tabs[0]) {
+    info.textContent = "Viga: ei suutnud leida aktiivset vahelehte";
+    return;
+  }
+
+  try {
+    const url = new URL(tabs[0].url);
+    info.textContent = "Domeen: " + url.hostname;
+
+    chrome.cookies.getAll({ domain: url.hostname }, cookies => {
+      currentCookies = cookies || [];
+      renderCookies(currentCookies);
+    });
+  } catch (err) {
+    info.textContent = "Viga: " + err.message;
+  }
+});
+
+function renderCookies(cookies) {
+  list.innerHTML = "";
+  if (!cookies || !cookies.length) {
+    list.innerHTML = "<li>Ei leitud küpsiseid</li>";
+    return;
+  }
+
+  cookies.forEach(c => {
+    const li = document.createElement("li");
+    li.textContent = c.name;
+    li.onclick = () => deleteCookie(c);
+    list.appendChild(li);
+  });
+}
+
+function deleteCookie(cookie) {
+  try {
+    const url = (cookie.secure ? "https://" : "http://") +
+                cookie.domain.replace(/^\\\\./, "") +
+                cookie.path;
+
+    chrome.cookies.remove({ url, name: cookie.name }, () => {
+      if (chrome.runtime.lastError) {
+        console.error("Cookie deletion error:", chrome.runtime.lastError);
+        return;
+      }
+      currentCookies = currentCookies.filter(c => c.name !== cookie.name);
+      renderCookies(currentCookies);
+    });
+  } catch (err) {
+    console.error("Error deleting cookie:", err);
+  }
+}
+
+deleteAllBtn.onclick = () => {
+  currentCookies.forEach(deleteCookie);
+};
+
+chrome.storage.local.get("blocked", data => {
+  if (chrome.runtime.lastError) {
+    console.error("Storage error:", chrome.runtime.lastError);
+    return;
+  }
+  
+  (data.blocked || []).forEach(b => {
+    try {
+      const li = document.createElement("li");
+      li.textContent = "[" + b.time + "] " + new URL(b.url).hostname;
+      blockedList.appendChild(li);
+    } catch (err) {
+      console.error("Error rendering blocked item:", err);
+    }
+  });
+});`);
+
+    /* ================= style.css ================= */
+    zip.file("style.css", `body {
+  font-family: sans-serif;
+  width: 320px;
+  padding: 10px;
+}
+h1 { font-size: 16px; }
+h2 { font-size: 13px; margin-top: 10px; }
+ul { padding-left: 14px; }
+li { font-size: 12px; cursor: pointer; }
+button { width: 100%; margin-bottom: 8px; }`);
+
+    /* ================= background.js ================= */
+    zip.file("background.js", `chrome.runtime.onInstalled.addListener(() => {
+  chrome.storage.local.set({ blocked: [] }, () => {
+    if (chrome.runtime.lastError) {
+      console.error("Storage initialization error:", chrome.runtime.lastError);
+    }
+  });
+});
+
+chrome.declarativeNetRequest.onRuleMatchedDebug.addListener(event => {
+  try {
+    const entry = {
+      time: new Date().toLocaleTimeString(),
+      url: event.request.url,
+      ruleId: event.rule.ruleId
+    };
+
+    chrome.storage.local.get("blocked", data => {
+      if (chrome.runtime.lastError) {
+        console.error("Storage get error:", chrome.runtime.lastError);
+        return;
+      }
+
+      const updated = [entry, ...(data.blocked || [])].slice(0, 50);
+      chrome.storage.local.set({ blocked: updated }, () => {
+        if (chrome.runtime.lastError) {
+          console.error("Storage set error:", chrome.runtime.lastError);
+        }
+      });
+    });
+  } catch (err) {
+    console.error("Error logging blocked request:", err);
+  }
+});`);
+
+    /* ================= rules.json ================= */
+    zip.file("rules.json", JSON.stringify([
+      {
+        "id": 1,
+        "priority": 1,
+        "action": {
+          "type": "modifyHeaders",
+          "responseHeaders": [
+            {
+              "header": "set-cookie",
+              "operation": "remove"
+            }
+          ]
+        },
+        "condition": {
+          "resourceTypes": ["main_frame", "sub_frame", "xmlhttprequest", "script", "image"],
+          "domainType": "thirdParty"
+        }
+      }
+    ], null, 2));
+
+    /* ================= DOWNLOAD ================= */
+    statusEl.textContent = "Genereerin ZIP-faili...";
+    statusEl.className = "";
+    
+    const blob = await zip.generateAsync({ type: "blob" });
+    
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "kupsise-kratt.zip";
+    a.click();
+    
+    // Clean up
+    setTimeout(() => URL.revokeObjectURL(a.href), 100);
+    
+    statusEl.textContent = "✅ Allalaadimine õnnestus!";
+    statusEl.className = "success";
+    
+  } catch (err) {
+    console.error("Download error:", err);
+    errorEl.textContent = "❌ Viga: " + err.message;
+    errorEl.style.display = "block";
+    statusEl.textContent = "";
+  }
+};
+</script>
+
+</body>
+</html>
