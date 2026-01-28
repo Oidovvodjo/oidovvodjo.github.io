@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "Küpsise-Kratt",
+  "version": "2.0",
+  "description": "Blokeerib ja kuvab jälgimisküpsised enne tekkimist",
+  "permissions": [
+    "cookies",
+    "tabs",
+    "storage",
+    "declarativeNetRequest",
+    "declarativeNetRequestFeedback"
+  ],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "block-cookies",
+        "enabled": true,
+        "path": "rules.json"
+      }
+    ]
+  },
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
