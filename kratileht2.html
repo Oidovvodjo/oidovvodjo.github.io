@@ -63,6 +63,28 @@ document.getElementById("download").onclick = async () => {
 }
 `);
 
+  /* ================= popup.html ================= */
+  zip.file("popup.html", `
+<!DOCTYPE html>
+<html lang="et">
+<head>
+  <meta charset="UTF-8">
+  <title>Küpsise-Kratt</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>🍪 Küpsise-Kratt</h1>
+  <div id="info"></div>
+  <button id="deleteAll">🧹 Kustuta kõik</button>
+  <ul id="cookieList"></ul>
+
+  <h2>⛔ Blokeeritud</h2>
+  <ul id="blockedList"></ul>
+
+  <script src="popup.js"></script>
+</body>
+</html>
+`);
   /* ================= popup.js ================= */
   zip.file("popup.js", `
 const list = document.getElementById("cookieList");
@@ -178,7 +200,6 @@ chrome.declarativeNetRequest.onRuleMatchedDebug.addListener(event => {
 ]
 `);
 
-
   /* ================= DOWNLOAD ================= */
   const blob = await zip.generateAsync({ type: "blob" });
   const a = document.createElement("a");
@@ -187,30 +208,6 @@ chrome.declarativeNetRequest.onRuleMatchedDebug.addListener(event => {
   a.click();
   URL.revokeObjectURL(a.href);
 };
-
-  /* ================= popup.html ================= */
-  zip.file("popup.html", `
-<!DOCTYPE html>
-<html lang="et">
-<head>
-  <meta charset="UTF-8">
-  <title>Küpsise-Kratt</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <h1>🍪 Küpsise-Kratt</h1>
-  <div id="info"></div>
-  <button id="deleteAll">🧹 Kustuta kõik</button>
-  <ul id="cookieList"></ul>
-
-  <h2>⛔ Blokeeritud</h2>
-  <ul id="blockedList"></ul>
-
-  <script src="popup.js">
-</body>
-</html>
-`);
-
 </script>
 
 </body>
