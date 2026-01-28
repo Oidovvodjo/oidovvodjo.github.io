@@ -30,8 +30,7 @@
 document.getElementById("download").onclick = async () => {
   const zip = new JSZip();
 
-  /* ================= manifest.json ================= */
-  zip.file("manifest.json", `
+ <script type="text/plain" id="file-manifest">
 {
   "manifest_version": 3,
   "name": "Küpsise-Kratt",
@@ -45,26 +44,20 @@ document.getElementById("download").onclick = async () => {
     "declarativeNetRequestFeedback"
   ],
   "host_permissions": ["<all_urls>"],
-  "background": {
-    "service_worker": "background.js"
-  },
+  "background": { "service_worker": "background.js" },
   "declarative_net_request": {
     "rule_resources": [
-      {
-        "id": "block-cookies",
-        "enabled": true,
-        "path": "rules.json"
-      }
+      { "id": "block-cookies", "enabled": true, "path": "rules.json" }
     ]
   },
-  "action": {
-    "default_popup": "popup.html"
-  }
+  "action": { "default_popup": "popup.html" }
 }
-`);
+</script>
+
 
   /* ================= popup.html ================= */
   zip.file("popup.html", `
+  
 <!DOCTYPE html>
 <html lang="et">
 <head>
@@ -85,8 +78,7 @@ document.getElementById("download").onclick = async () => {
 </body>
 </html>
 `);
-  /* ================= popup.js ================= */
-  zip.file("popup.js", `
+  <script type="text/plain" id="file-popup-js">
 const list = document.getElementById("cookieList");
 const info = document.getElementById("info");
 const deleteAllBtn = document.getElementById("deleteAll");
