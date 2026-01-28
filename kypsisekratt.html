@@ -31,12 +31,12 @@
 </head>
 <body>
 
-<h1>🍪 Küpsise-Kratt</h1>
+<h1>KüpsiseKratt</h1>
 <p>
-  Kliki nuppu, et alla laadida <strong>täielik töötav brauserilaiendus</strong>.
+ Vajuta all olevat nuppu, et alla laadida KüpsiseKratt!</strong>.
 </p>
 
-<button id="download">⬇ Laadi alla Küpsise-Kratt</button>
+<button id="download"> LAADI ALLA KÜPSISEKRATT:</button>
 <div id="status"></div>
 <div id="error" class="error"></div>
 
@@ -60,9 +60,9 @@ document.getElementById("download").onclick = async () => {
     /* ================= manifest.json ================= */
     zip.file("manifest.json", JSON.stringify({
       "manifest_version": 3,
-      "name": "Küpsise-Kratt",
-      "version": "2.0",
-      "description": "Blokeerib jälgimisküpsised enne nende tekkimist",
+      "name": "KüpsiseKratt",
+      "version": "1.0",
+      "description": "See blokeerib veebilehe küpsiseid.",
       "permissions": [
         "cookies",
         "tabs",
@@ -93,16 +93,16 @@ document.getElementById("download").onclick = async () => {
 <html lang="et">
 <head>
   <meta charset="UTF-8">
-  <title>Küpsise-Kratt</title>
+  <title>KüpsiseKratt</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>🍪 Küpsise-Kratt</h1>
+  <h1>KüpsiseKratt</h1>
   <div id="info"></div>
-  <button id="deleteAll">🧹 Kustuta kõik</button>
+  <button id="deleteAll">KUSTUTA KÕIK</button>
   <ul id="cookieList"></ul>
 
-  <h2>⛔ Blokeeritud</h2>
+  <h2>BLOKEERITUD KÜPSISED:</h2>
   <ul id="blockedList"></ul>
 
   <script src="popup.js"><\/script>
@@ -159,14 +159,14 @@ function deleteCookie(cookie) {
 
     chrome.cookies.remove({ url, name: cookie.name }, () => {
       if (chrome.runtime.lastError) {
-        console.error("Cookie deletion error:", chrome.runtime.lastError);
+        console.error("Küpsise kustutamisel tekkis viga:", chrome.runtime.lastError);
         return;
       }
       currentCookies = currentCookies.filter(c => c.name !== cookie.name);
       renderCookies(currentCookies);
     });
   } catch (err) {
-    console.error("Error deleting cookie:", err);
+    console.error("Tekkis viga küpsise kustutamisel:", err);
   }
 }
 
@@ -174,7 +174,7 @@ deleteAllBtn.onclick = () => {
   currentCookies.forEach(deleteCookie);
 };
 
-chrome.storage.local.get("blocked", data => {
+chrome.storage.local.get("blokeeritud", data => {
   if (chrome.runtime.lastError) {
     console.error("Storage error:", chrome.runtime.lastError);
     return;
@@ -186,7 +186,7 @@ chrome.storage.local.get("blocked", data => {
       li.textContent = "[" + b.time + "] " + new URL(b.url).hostname;
       blockedList.appendChild(li);
     } catch (err) {
-      console.error("Error rendering blocked item:", err);
+      console.error("Error:", err);
     }
   });
 });`);
@@ -207,7 +207,7 @@ button { width: 100%; margin-bottom: 8px; }`);
     zip.file("background.js", `chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.local.set({ blocked: [] }, () => {
     if (chrome.runtime.lastError) {
-      console.error("Storage initialization error:", chrome.runtime.lastError);
+      console.error("Mahuerror:", chrome.runtime.lastError);
     }
   });
 });
@@ -222,19 +222,19 @@ chrome.declarativeNetRequest.onRuleMatchedDebug.addListener(event => {
 
     chrome.storage.local.get("blocked", data => {
       if (chrome.runtime.lastError) {
-        console.error("Storage get error:", chrome.runtime.lastError);
+        console.error("Mahuerror:", chrome.runtime.lastError);
         return;
       }
 
       const updated = [entry, ...(data.blocked || [])].slice(0, 50);
       chrome.storage.local.set({ blocked: updated }, () => {
         if (chrome.runtime.lastError) {
-          console.error("Storage set error:", chrome.runtime.lastError);
+          console.error("Mahuerror:", chrome.runtime.lastError);
         }
       });
     });
   } catch (err) {
-    console.error("Error logging blocked request:", err);
+    console.error("Error blokeeritud päringu kohta:", err);
   }
 });`);
 
@@ -260,25 +260,25 @@ chrome.declarativeNetRequest.onRuleMatchedDebug.addListener(event => {
     ], null, 2));
 
     /* ================= DOWNLOAD ================= */
-    statusEl.textContent = "Genereerin ZIP-faili...";
+    statusEl.textContent = "Koostan ZIP-faili... Oota veidi";
     statusEl.className = "";
     
     const blob = await zip.generateAsync({ type: "blob" });
     
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = "kupsise-kratt.zip";
+    a.download = "kupsisekratt.zip";
     a.click();
     
     // Clean up
     setTimeout(() => URL.revokeObjectURL(a.href), 100);
     
-    statusEl.textContent = "✅ Allalaadimine õnnestus!";
+    statusEl.textContent = "Allalaadimine õnnestus!";
     statusEl.className = "success";
     
   } catch (err) {
     console.error("Download error:", err);
-    errorEl.textContent = "❌ Viga: " + err.message;
+    errorEl.textContent = "Tekkis viga: " + err.message;
     errorEl.style.display = "block";
     statusEl.textContent = "";
   }
