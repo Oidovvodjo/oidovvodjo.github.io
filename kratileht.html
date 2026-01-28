@@ -1,0 +1,159 @@
+Siin on **valmis ja lihtne HTML-leht**, mille kaudu saab **Küpsise-Kratti alla laadida**.
+See sobib nii koolitööks, GitHub Pages’iks kui ka tavalisele veebiserverile.
+
+> Eeldus: allalaetav fail on **`kupsise-kratt.zip`** samas kaustas mis HTML.
+
+---
+
+```html
+<!DOCTYPE html>
+<html lang="et">
+<head>
+  <meta charset="UTF-8">
+  <title>Küpsise-Kratt – privaatsuse kaitse</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f5f6f8;
+      margin: 0;
+      padding: 0;
+      color: #222;
+    }
+
+    header {
+      background: #111827;
+      color: #fff;
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0 0 10px;
+      font-size: 28px;
+    }
+
+    header p {
+      margin: 0;
+      opacity: 0.9;
+    }
+
+    main {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    section {
+      background: #fff;
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+    }
+
+    h2 {
+      margin-top: 0;
+    }
+
+    ul {
+      padding-left: 20px;
+    }
+
+    .download {
+      text-align: center;
+    }
+
+    .download a {
+      display: inline-block;
+      background: #2563eb;
+      color: #fff;
+      text-decoration: none;
+      padding: 14px 24px;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .download a:hover {
+      background: #1e40af;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 13px;
+      color: #666;
+    }
+
+    code {
+      background: #f1f1f1;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🍪 Küpsise-Kratt</h1>
+  <p>Brauserilaiendus, mis blokeerib jälgimisküpsised enne nende tekkimist</p>
+</header>
+
+<main>
+
+  <section>
+    <h2>Mis see on?</h2>
+    <p>
+      <strong>Küpsise-Kratt</strong> on privaatsust kaitsev brauserilaiendus,
+      mis:
+    </p>
+    <ul>
+      <li>blokib kolmandate osapoolte küpsised enne loomist</li>
+      <li>takistab jälgimist (nt reklaami- ja analüütikavõrgud)</li>
+      <li>näitab kasutajale, millised katsed blokeeriti</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Kuidas paigaldada?</h2>
+    <ol>
+      <li>Laadi alla ZIP-fail</li>
+      <li>Paki see lahti</li>
+      <li>Ava Chrome ja mine aadressile <code>chrome://extensions</code></li>
+      <li>Lülita sisse <strong>Developer mode</strong></li>
+      <li>Vali <strong>Load unpacked</strong> ja osuta kaustale</li>
+    </ol>
+  </section>
+
+  <section class="download">
+    <h2>Allalaadimine</h2>
+    <p>
+      Laadi Küpsise-Kratt alla siit:
+    </p>
+    <a href="kupsise-kratt.zip" download>
+      ⬇ Laadi alla Küpsise-Kratt
+    </a>
+  </section>
+
+</main>
+
+<footer>
+  © 2026 · Küpsise-Kratt · Privaatsus enne kõike
+</footer>
+
+</body>
+</html>
+```
+
+---
+
+Kui tahad, saan:
+
+* ✍️ lisada **koolitöö seletuse** samale lehele
+* 🌍 teha **ingliskeelse versiooni**
+* 📦 anda ka **README.md** ZIP-i sisse
+* 🎨 muuta disaini (tumedam, minimalistlikum, “küberkratt” stiil)
+
+Ütle, kuhu edasi 👍
