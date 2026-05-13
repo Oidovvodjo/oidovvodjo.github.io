@@ -65,6 +65,25 @@
       border-radius: 5px;
       white-space: pre-wrap;
     }
+    .checkbox-group {
+      margin-top: 15px;
+    }
+    
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    
+      margin-top: 10px;
+      font-weight: normal;
+      cursor: pointer;
+    }
+    
+    .checkbox-label input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin: 0;
+    }
   </style>
 </head>
 
@@ -95,21 +114,25 @@
   <textarea id="oskused" rows="3" placeholder="Näiteks Python, suhtlemine, inglise keel"></textarea>
 
   <label>Millist tööd otsid?</label>
-  <input type="text" id="tootyyp" placeholder="Näiteks IT, kohvik, laotöö">
-
-  <label>
-  <input type="checkbox" id="osalinetoo">
-  Osaline tööaeg
-  </label>
-
-  <label>
-    <input type="checkbox" id="hooajatoo">
-    Hooajatöö
-  </label>
+    <input type="text" id="tootyyp" placeholder="Näiteks IT, kohvik, laotöö">
   
-  <button onclick="looPrompt()">Loo AI-prompt</button>
-  <button onclick="otsiCVKeskus()">Otsi CVKeskusest</button>
-  <button onclick="avaChatGPT()">Ava ChatGPT</button>
+    <div class="checkbox-group">
+  
+  <label class="checkbox-label">
+      <input type="checkbox" id="osalinetoo">
+      <span>Osaline tööaeg</span>
+  </label>
+
+  <label class="checkbox-label">
+    <input type="checkbox" id="hooajatoo">
+    <span>Hooajatöö</span>
+  </label>
+
+  </div>
+  
+  <button onclick="looPrompt()">Loo prompt AI jaoks</button>
+  <button onclick="otsiCVKeskus()">Otsi tööd CVKeskusest</button>
+  <button onclick="avaChatGPT()">Ava ChatGPT töö otsimiseks</button>
   <button onclick="kopeeriPrompt()">Kopeeri prompt</button>
 
   <div class="result" id="tulemus"></div>
