@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2026 Suvetöö AI-Otsija</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+
+    button {
+      margin-top: 15px;
+      margin-right: 10px;
+      padding: 12px 20px;
+      background-color: #0077cc;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #005fa3;
+    }
+
+    .result {
+      margin-top: 30px;
+      background: #eef6ff;
+      padding: 15px;
+      border-radius: 5px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>2026. aasta suvetöö AI-programm</h1>
+
+  <label>Vanus</label>
+  <input type="text" id="vanus" placeholder="Näiteks 16">
+
+  <label>Asukoht</label>
+  <select id="asukoht">
+    <option value="3">Tallinn</option>
+    <option value="4">Tartu</option>
+    <option value="5">Pärnu</option>
+    <option value="6">Narva</option>
+    <option value="7">Haapsalu</option>
+    <option value="8">Harjumaa</option>
+    <option value="21">Viljandimaa</option>
+  </select>
+
+  <label>Huvialad</label>
+  <input type="text" id="huvid" placeholder="Näiteks programmeerimine, sport">
+
+  <label>Oskused</label>
+  <textarea id="oskused" rows="3" placeholder="Näiteks Python, suhtlemine, inglise keel"></textarea>
+
+  <label>Millist tööd otsid?</label>
+  <input type="text" id="tootyyp" placeholder="Näiteks IT, kohvik, laotöö">
+
+  <button onclick="looPrompt()">Loo AI-prompt</button>
+  <button onclick="otsiCVKeskus()">Otsi CVKeskusest</button>
+  <button onclick="avaChatGPT()">Ava ChatGPT</button>
+  <button onclick="kopeeriPrompt()">Kopeeri prompt</button>
+
+  <div class="result" id="tulemus"></div>
+
+</div>
+
+<script>
+
+function getAsukohtNimi(id) {
+  const map = {
+    "3": "Tallinn",
+    "4": "Tartu",
+    "5": "Pärnu",
+    "6": "Narva",
+    "7": "Haapsalu",
+    "8": "Harjumaa",
+    "21": "Viljandimaa"
+  };
+  return map[id] || "Eesti";
+}
+
+function looPrompt() {
+
+  const vanus = document.getElementById('vanus').value;
+  const asukohtId = document.getElementById('asukoht').value;
+  const asukohtNimi = getAsukohtNimi(asukohtId);
+
+  const huvid = document.getElementById('huvid').value;
+  const oskused = document.getElementById('oskused').value;
+  const tootyyp = document.getElementById('tootyyp').value;
+
+  const prompt =
+`Olen ${vanus}-aastane õpilane Eestis ja otsin 2026. aasta suveks lepingulist tööd.
+
+Minu elukoht: ${asukohtNimi}
+Minu huvivaldkonnad: ${huvid}
+Minu oskused: ${oskused}
+Soovin leida: ${tootyyp}
+
+Palun:
+1. Paku vähemalt 10 suvetöö ideed.
+2. Leia sobivad ettevõtted või tööportaalid.
+3. Selgita, millised tööd sobivad minu vanusele.
+4. Koosta CV näidis.
+5. Kirjuta kandideerimiskiri.
+6. Anna tööotsimise nõu.
+
+Vasta selgelt ja punktidena.`;
+
+  document.getElementById('tulemus').innerText = prompt;
+}
+
+function otsiCVKeskus() {
+
+  const huvid = document.getElementById('huvid').value;
+  const asukohtId = document.getElementById('asukoht').value;
+  const asukohtNimi = getAsukohtNimi(asukohtId);
+  const tootyyp = document.getElementById('tootyyp').value;
+
+  const keyword = encodeURIComponent(
+    tootyyp
+  );
+
+  const url =
+    "https://www.cvkeskus.ee/toopakkumised?op=search"
+    + "&search%5Bkeyword%5D=" + keyword
+    + "&search%5Blocations%5D%5B%5D=" + asukohtId;
+
+  window.open(url, "_blank");
+}
+
+function avaChatGPT() {
+
+  const vanus = document.getElementById('vanus').value;
+  const asukohtNimi = getAsukohtNimi(
+    document.getElementById('asukoht').value
+  );
+
+  const huvid = document.getElementById('huvid').value;
+  const oskused = document.getElementById('oskused').value;
+  const tootyyp = document.getElementById('tootyyp').value;
+
+  const prompt =
+`Olen ${vanus}-aastane õpilane Eestis ja otsin 2026. aasta suveks lepingulist tööd.
+
+Minu elukoht: ${asukohtNimi}
+Minu huvivaldkonnad: ${huvid}
+Minu oskused: ${oskused}
+Soovin leida: ${tootyyp}
+
+Palun:
+1. Paku vähemalt 10 suvetöö ideed.
+2. Leia sobivad ettevõtted või tööportaalid.
+3. Selgita, millised tööd sobivad minu vanusele.
+4. Koosta CV näidis.
+5. Kirjuta kandideerimiskiri.`;
+
+  const url = "https://chatgpt.com/?prompt=" + encodeURIComponent(prompt);
+  window.open(url, "_blank");
+}
+
+function kopeeriPrompt() {
+  const tekst = document.getElementById('tulemus').innerText;
+  navigator.clipboard.writeText(tekst);
+  alert("Prompt kopeeritud!");
+}
+
+</script>
+
+</body>
+</html>
