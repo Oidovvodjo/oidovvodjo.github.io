@@ -169,14 +169,33 @@ function otsiCVKeskus() {
   const asukohtNimi = getAsukohtNimi(asukohtId);
   const tootyyp = document.getElementById('tootyyp').value;
 
+  // checkboxid
+  const osalineToo =
+    document.getElementById('osalinetoo').checked;
+
+  const hooajaToo =
+    document.getElementById('hooajatoo').checked;
+
+  // märksõna
   const keyword = encodeURIComponent(
-    tootyyp
+    huvid + " " + tootyyp + " " + asukohtNimi
   );
 
-  const url =
+  // põhilink
+  let url =
     "https://www.cvkeskus.ee/toopakkumised?op=search"
     + "&search%5Bkeyword%5D=" + keyword
     + "&search%5Blocations%5D%5B%5D=" + asukohtId;
+
+  // osaline tööaeg
+  if (osalineToo) {
+    url += "&search%5Bwork_time%5D%5B%5D=2";
+  }
+
+  // hooajatöö
+  if (hooajaToo) {
+    url += "&search%5Bwork_type%5D%5B%5D=2";
+  }
 
   window.open(url, "_blank");
 }
